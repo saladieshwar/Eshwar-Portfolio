@@ -530,21 +530,8 @@ ol {
   transition: color 0.35s var(--ease), background 0.35s var(--ease);
 }
 
-.nav__links a span {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  color: rgba(62, 240, 255, 0.72);
-  transition: transform 0.4s var(--ease), color 0.4s var(--ease);
-}
-
 .nav__links a:hover {
   color: var(--text);
-}
-
-.nav__links a:hover span {
-  color: var(--cyan);
-  transform: translateY(-2px);
 }
 
 .nav__links a[aria-current="true"] {
@@ -2622,7 +2609,6 @@ a.contact-line__value:hover {
   .btn:hover,
   .logo:hover .logo__mark,
   .logo:hover .logo__name::after,
-  .nav__links a:hover span,
   .footer__links a:hover,
   .footer__links a:hover::after,
   .footer__panel:hover .footer__name::after,
