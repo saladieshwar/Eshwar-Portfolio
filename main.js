@@ -17,6 +17,8 @@ const roles = [
   initStageLight();
   initMobileView();
   initCursor();
+  initBubbles();
+  initMail();
 
   if (reduceMotion || !window.gsap || !window.ScrollTrigger) {
     initTypewriter();
@@ -396,6 +398,95 @@ function initTypewriter() {
 
   visual.textContent = "";
   window.setTimeout(tick, 280);
+}
+
+function initMail() {
+  const address = "eshwars263@gmail.com";
+  const compose = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(address)}`;
+
+  document.querySelectorAll('a[href^="mailto:"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const tab = window.open(compose, "_blank", "noopener,noreferrer");
+      if (!tab) window.location.href = `mailto:${address}`;
+    });
+  });
+}
+
+function initBubbles() {
+  const field = document.querySelector(".bubbles");
+  if (!field) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cursor = document.querySelector(".cursor");
+  const blocked = "a, button, input, textarea, select, .nav, .skill-card, .facts div, .project, .contact-card, .timeline__body, .footer__panel, .hero__portrait, .kicker, h1, h2, h3, p";
+
+  const covers = (target) => target instanceof Element && Boolean(target.closest(blocked));
+
+  const hit = (x, y) => {
+    let match = null;
+    let best = Infinity;
+    field.querySelectorAll(".bubble:not(.is-pop)").forEach((bubble) => {
+      const rect = bubble.getBoundingClientRect();
+      const radius = rect.width / 2;
+      if (radius < 3) return;
+      const dist = Math.hypot(x - (rect.left + radius), y - (rect.top + radius));
+      if (dist > radius + 8 || dist >= best) return;
+      if (Number(getComputedStyle(bubble).opacity) < 0.28) return;
+      best = dist;
+      match = bubble;
+    });
+    return match;
+  };
+
+  const burst = (x, y, size) => {
+    if (reduce) return;
+    const node = document.createElement("span");
+    node.className = "burst";
+    node.setAttribute("aria-hidden", "true");
+    node.style.left = x + "px";
+    node.style.top = y + "px";
+
+    const ring = document.createElement("i");
+    ring.className = "burst__ring";
+    node.appendChild(ring);
+
+    const count = size > 18 ? 8 : 6;
+    for (let index = 0; index < count; index += 1) {
+      const drop = document.createElement("i");
+      drop.className = "burst__drop";
+      drop.style.setProperty("--a", `${index * (360 / count) + 12}deg`);
+      drop.style.setProperty("--d", `${20 + (index % 3) * 8}px`);
+      node.appendChild(drop);
+    }
+
+    document.body.appendChild(node);
+    window.setTimeout(() => node.remove(), 700);
+  };
+
+  const pop = (bubble) => {
+    const rect = bubble.getBoundingClientRect();
+    bubble.classList.add("is-pop");
+    burst(rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width);
+    window.setTimeout(() => {
+      bubble.classList.remove("is-pop");
+      bubble.style.animation = "none";
+      void bubble.offsetWidth;
+      bubble.style.animation = "";
+      bubble.style.animationDelay = "0s";
+    }, reduce ? 160 : 980);
+  };
+
+  document.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || covers(event.target)) return;
+    const bubble = hit(event.clientX, event.clientY);
+    if (bubble) pop(bubble);
+  });
+
+  if (!cursor) return;
+  document.addEventListener("pointermove", (event) => {
+    cursor.classList.toggle("is-aim", !covers(event.target) && Boolean(hit(event.clientX, event.clientY)));
+  }, { passive: true });
 }
 
 function initCursor() {
